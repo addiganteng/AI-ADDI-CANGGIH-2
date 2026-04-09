@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Super Canggih - Simple</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0a1f, #1a0033);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .chat-box {
+      width: 100%;
+      max-width: 820px;
+      height: 95vh;
+      background: rgba(20, 20, 50, 0.85);
+      border-radius: 24px;
+      border: 1px solid rgba(100, 200, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .header {
+      padding: 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid rgba(100, 200, 255, 0.2);
+    }
+    .header h1 {
+      font-size: 2.4em;
+      font-weight: 600;
+      background: linear-gradient(90deg, #00ffcc, #cc00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .messages {
+      flex: 1;
+      padding: 25px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .message {
+      max-width: 80%;
+      padding: 16px 22px;
+      border-radius: 20px;
+      line-height: 1.6;
+    }
+    .user {
+      align-self: flex-end;
+      background: #00ffcc;
+      color: #000;
+      font-weight: 500;
+      border-bottom-right-radius: 6px;
+    }
+    .ai {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(150, 220, 255, 0.3);
+      border-bottom-left-radius: 6px;
+    }
+    .input-area {
+      padding: 20px;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      gap: 12px;
+    }
+    input {
+      flex: 1;
+      padding: 18px 24px;
+      border: none;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1.1em;
+    }
+    input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.2);
+    }
+    button {
+      padding: 18px 36px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #00ffcc, #cc00ff);
+      color: black;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-box">
+    <div class="header">
+  <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
+    <h1 style="margin:0;">AI ADDI CANGGIH</h1>
+    <a href="https://www.tiktok.com/@addisiuuuuuuiu" target="_blank" style="color:#00ffcc; text-decoration:none;">
+      🔥 TikTok
+    </a>
+  </div>
+  <p>di buat oleh addi • di bantu oleh gemini</p>
+</div>
+    
+    <div class="messages" id="messages">
+      <div class="message ai">
+        Halo user! Aku AI addi Canggih versi bantuan gemini. Mau tanya apa hari ini?
+      </div>
+    </div>
+    
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Ketik pertanyaanmu di sini..." autocomplete="off">
+      <button onclick="sendMessage()">Kirim</button>
+    </div>
+  </div>
+
+  <script>
+    const GEMINI_KEY = "AIzaSyCy2BY1KPQzA2Enf1MSCB1Zi883Ri8gHEI";  // GANTI DENGAN API KEY GEMINI KAMU
+    
+    const messagesDiv = document.getElementById('messages');
+    const userInput = document.getElementById('userInput');
+
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      // Tampilkan pesan user
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message user';
+      userMsg.textContent = text;
+      messagesDiv.appendChild(userMsg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      userInput.value = '';
+
+      // Typing indicator
+      const typing = document.createElement('div');
+      typing.className = 'message ai';
+      typing.textContent = 'Sedang berpikir...';
+      messagesDiv.appendChild(typing);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: text }] }]
+          })
+        });
+
+        const data = await res.json();
+        const reply = data.candidates[0].content.parts[0].text;
+
+        typing.remove();
+
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'message ai';
+        aiMsg.textContent = reply;
+        messagesDiv.appendChild(aiMsg);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      } catch (err) {
+        typing.remove();
+        const errMsg = document.createElement('div');
+        errMsg.className = 'message ai';
+        errMsg.textContent = "Error. Pastikan API Key Gemini sudah benar.";
+        messagesDiv.appendChild(errMsg);
+      }
+    }
+
+    // Kirim dengan tombol Enter
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
